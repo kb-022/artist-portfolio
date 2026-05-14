@@ -24,3 +24,4 @@ frontend/node_modules
 .env
 uploads/
 backend/.env
+backend/art
