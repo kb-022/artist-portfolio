@@ -1,8 +1,12 @@
+mod api;
+
 use std::env;
 use axum::routing::{get, post};
 use axum::Router;
 use dotenv;
 use sqlx::postgres::PgPoolOptions;
+use crate::api::collections::{get_all_collections, get_collection_by_slug};
+use crate::api::mediums::get_all_mediums;
 
 #[tokio::main]
 async fn main() {
@@ -15,7 +19,10 @@ async fn main() {
 
 
     let app = Router::new()
-        .route("/",get(root))
+        .route("/api",get(root))
+        .route("/api/collections",get(get_all_collections))
+        .route("/api/collections/{slug}",get(get_collection_by_slug))
+        .route("/api/mediums",get(get_all_mediums))
         .with_state(pool);
 
 
