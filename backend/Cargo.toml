@@ -9,3 +9,4 @@ serde = { version = "1.0.228", features = ["derive"] }
 sqlx = { version = "0.8.6", features = ["postgres","runtime-tokio-rustls","macros"]}
 tokio = { version = "1.52.3", features = ["full"] }
 dotenv = "0.15.0"
+tower-http = { version = "0.6.10", features = ["fs"] }

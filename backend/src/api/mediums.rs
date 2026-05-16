@@ -7,13 +7,14 @@ use sqlx::{FromRow, PgPool};
 
 #[derive(Debug,Serialize,FromRow)]
 pub struct Medium{
+    pub id: i16,
     pub name: String,
     pub slug: String,
 }
 
 
 async fn get_all_mediums_handler(pool: &PgPool) -> Result<Vec<Medium>,sqlx::Error>{
-    sqlx::query_as::<_,Medium>("SELECT * FROM mediums")
+    sqlx::query_as!(Medium,"SELECT * FROM mediums")
     .fetch_all(pool)
     .await
 }
