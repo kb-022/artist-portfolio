@@ -26,3 +26,4 @@ uploads/
 backend/.env
 backend/art
 frontend/.env
+.idea
