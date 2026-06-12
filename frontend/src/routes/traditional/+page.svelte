@@ -1,30 +1,11 @@
-<script>
-    import { PUBLIC_API_URL } from '$env/static/public';
-    let { data } = $props();
+<script lang="ts">
+    import ArtGrid from '$lib/components/ArtGrid.svelte';
+    import type { PageData } from './$types';
+
+    let { data }: { data: PageData } = $props();
 </script>
 
-<h1>Traditional Works</h1>
-
-<div class="grid">
-    {#each data.works as work}
-        <div class="card">
-            <img src={`${PUBLIC_API_URL}${work.image}`} alt={work.title} />
-            <h2>{work.title}</h2>
-            <p>{work.medium}</p>
-        </div>
-    {/each}
+<div class="mx-auto max-w-7xl px-4 py-12">
+    <h1 class="mb-8 text-4xl font-bold text-gray-900">Traditional Works</h1>
+    <ArtGrid artworks={data.artworks} />
 </div>
-
-<style>
-    .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 1rem;
-    }
-
-    .card img {
-        width: 100%;
-        height: auto;
-        display: block;
-    }
-</style>

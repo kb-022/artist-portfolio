@@ -1,13 +1,23 @@
 import { PUBLIC_API_URL } from '$env/static/public';
-import type { PageServerLoad } from "./$types";
-import {error} from "@sveltejs/kit";
+import type { Art } from '$lib/types';
+import type { PageServerLoad } from './$types';
+
 export const load: PageServerLoad = async ({ fetch }) => {
-    const response = await fetch(`${PUBLIC_API_URL}/api/traditional`);
+	try {
+		const res = await fetch(`${PUBLIC_API_URL}/api/traditional`);
+		if (!res.ok) throw new Error('Failed to fetch traditional works');
 
-    if (!response.ok){
-        throw error(response.status, 'Failed to fetch data');
-    }
+		const artworks: Art[] = await res.json();
 
-    const works = await response.json();
-    return { works };
+		// Prepend the backend URL to image paths
+		const processedArtworks = artworks.map((art) => ({
+			...art,
+			image: `${PUBLIC_API_URL}${art.image}`
+		}));
+
+		return { artworks: processedArtworks };
+	} catch (error) {
+		console.error('Error fetching traditional works:', error);
+		return { artworks: [] };
+	}
 };

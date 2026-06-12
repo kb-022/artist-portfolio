@@ -12,11 +12,12 @@ pub struct Work {
     pub description: Option<String>,
     pub year: i16,
     pub image: String,
-    pub collection_medium_name: String
+    pub collection_medium_name: String,
+    pub art_type: String,
 }
 
 async fn get_work_by_slug_handler(pool: &PgPool,slug: String) -> Result<Work,sqlx::Error> {
-    sqlx::query_as::<_,Work>("SELECT works.id, works.title, works.slug, works.description, works.year, works.image,
+    sqlx::query_as::<_,Work>("SELECT works.id, works.title, works.slug, works.description, works.year, works.image, works.art_type,
     COALESCE(collections.name,mediums.name) AS collection_medium_name
     FROM works
     LEFT JOIN collections ON collections.id = works.collection_id
