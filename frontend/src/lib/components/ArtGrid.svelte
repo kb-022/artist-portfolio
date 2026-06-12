@@ -20,7 +20,9 @@
     </div>
 {:else if artworks.length === 0}
     <div class="flex items-center justify-center py-12">
-        <div class="text-lg text-gray-500">No artworks found.</div>
+        <div class="text-center">
+            <p class="text-lg text-gray-500">No artworks found.</p>
+        </div>
     </div>
 {:else}
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -28,7 +30,7 @@
             <button
                     type="button"
                     onclick={() => handleClick(artwork.slug)}
-                    class="group cursor-pointer overflow-hidden rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:ring-2 hover:ring-gray-300"
+                    class="group overflow-hidden rounded-lg shadow-md transition-all duration-300 hover:shadow-xl hover:ring-2 hover:ring-gray-400"
             >
                 <div class="aspect-square overflow-hidden bg-gray-100">
                     {#if artwork.image}
@@ -43,10 +45,13 @@
                 <div class="bg-white p-4">
                     <h3 class="truncate text-sm font-semibold text-gray-900">{artwork.title}</h3>
                     {#if artwork.medium}
-                        <p class="mt-1 text-xs text-gray-600">{artwork.medium}</p>
+                        <p class="mt-1 text-xs text-gray-500">{artwork.medium}</p>
+                    {/if}
+                    {#if artwork.year}
+                        <p class="text-xs text-gray-400">{artwork.year}</p>
                     {/if}
                     {#if artwork.description}
-                        <p class="mt-2 line-clamp-2 text-xs text-gray-700">{artwork.description}</p>
+                        <p class="mt-2 line-clamp-2 text-xs text-gray-600">{artwork.description}</p>
                     {/if}
                 </div>
             </button>
