@@ -1,8 +1,10 @@
+use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::Json;
 use serde::Serialize;
 use sqlx::{FromRow, PgPool};
+use crate::AppState;
 
 #[derive(Debug, Serialize, FromRow)]
 pub struct CollectionAll {
@@ -33,8 +35,8 @@ pub struct CollectionDisplay{
      .await
 }
 
-pub async fn get_all_collections(State(pool): State<PgPool>) -> Result<Json<Vec<CollectionAll>>, StatusCode> {
-    get_all_collections_handler(&pool).await.map(Json).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
+pub async fn get_all_collections(State(state): State<Arc<AppState>>) -> Result<Json<Vec<CollectionAll>>, StatusCode> {
+    get_all_collections_handler(&state.db).await.map(Json).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
 }
 
 async fn get_collection_by_slug_handler(pool: &PgPool, slug: String) -> Result<CollectionSingle, sqlx::Error> {
@@ -43,8 +45,8 @@ async fn get_collection_by_slug_handler(pool: &PgPool, slug: String) -> Result<C
     .await
 }
 
-pub async fn get_collection_by_slug(State(pool): State<PgPool>, Path(slug): Path<String>) -> Result<Json<CollectionSingle>, StatusCode> {
-    get_collection_by_slug_handler(&pool, slug).await.map(Json).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
+pub async fn get_collection_by_slug(State(state): State<Arc<AppState>>, Path(slug): Path<String>) -> Result<Json<CollectionSingle>, StatusCode> {
+    get_collection_by_slug_handler(&state.db, slug).await.map(Json).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
 }
 
 async fn get_all_works_in_collection_handler(pool: &PgPool, slug: String) -> Result<Vec<CollectionDisplay>,sqlx::Error> {
@@ -56,6 +58,6 @@ WHERE collections.slug = $1")
     .await
 }
 
-pub async fn get_all_works_in_collection(State(pool): State<PgPool>, Path(slug): Path<String>) -> Result<Json<Vec<CollectionDisplay>>,StatusCode> {
-    get_all_works_in_collection_handler(&pool, slug).await.map(Json).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
+pub async fn get_all_works_in_collection(State(state): State<Arc<AppState>>, Path(slug): Path<String>) -> Result<Json<Vec<CollectionDisplay>>,StatusCode> {
+    get_all_works_in_collection_handler(&state.db, slug).await.map(Json).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
 }

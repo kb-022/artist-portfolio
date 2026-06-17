@@ -1,36 +1,48 @@
 mod api;
+mod auth;
+mod config;
+mod route;
 
-use std::env;
-use axum::routing::{get};
-use axum::Router;
+use crate::config::Config;
+use crate::route::create_router;
+use axum::http::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
+use axum::http::{HeaderValue, Method};
 use dotenv;
 use sqlx::postgres::PgPoolOptions;
-use tower_http::services::ServeDir;
-use crate::api::collections::{get_all_collections, get_all_works_in_collection, get_collection_by_slug};
-use crate::api::mediums::get_all_mediums;
-use crate::api::traditional::get_all_traditional;
-use crate::api::works::get_work_by_slug;
+use sqlx::{Pool, Postgres};
+use std::sync::Arc;
+use tower_http::cors::CorsLayer;
+
+pub struct AppState {
+    db: Pool<Postgres>,
+    env: Config,
+}
 
 #[tokio::main]
 async fn main() {
     dotenv::dotenv().ok();
-    let db_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
 
-    let pool = PgPoolOptions::new().connect(&db_url).await.expect("Database connection failed");
+    let config = Config::init();
+
+    let pool = PgPoolOptions::new()
+        .max_connections(10)
+        .connect(&config.database_url)
+        .await
+        .expect("Database connection failed");
 
     sqlx::migrate!().run(&pool).await.expect("Migrations failed");
 
+    let cors = CorsLayer::new()
+        .allow_origin("http://localhost:3000".parse::<HeaderValue>().unwrap())
+        .allow_methods(vec![Method::GET, Method::POST, Method::PATCH, Method::DELETE])
+        .allow_credentials(true)
+        .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
 
-    let app = Router::new()
-        .route("/api",get(root))
-        .route("/api/collections",get(get_all_collections))
-        .route("/api/collections/{slug}",get(get_collection_by_slug))
-        .route("/api/collections/{slug}/works",get(get_all_works_in_collection))
-        .route("/api/traditional",get(get_all_traditional))
-        .route("/api/mediums",get(get_all_mediums))
-        .route("/api/works/{slug}",get(get_work_by_slug))
-        .nest_service("/art",ServeDir::new("art"))
-        .with_state(pool);
+    let app = create_router(Arc::new(AppState{
+        db: pool.clone(),
+        env: config.clone(),
+    }))
+        .layer(cors);
 
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
@@ -39,7 +51,7 @@ async fn main() {
 
     println!("Listening on: {}", listener.local_addr().unwrap());
 
-    axum::serve(listener,app)
+    axum::serve(listener,app.into_make_service())
         .await
         .expect("Failed to run server");
 }

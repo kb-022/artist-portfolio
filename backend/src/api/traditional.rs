@@ -1,8 +1,10 @@
+use std::sync::Arc;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::Json;
 use serde::Serialize;
 use sqlx::{FromRow, PgPool};
+use crate::AppState;
 
 #[derive(Debug, FromRow, Serialize)]
 pub struct TraditionalDisplay{
@@ -20,6 +22,6 @@ async fn get_all_traditional_handler(pool: &PgPool) -> Result<Vec<TraditionalDis
         .await
 }
 
-pub async fn get_all_traditional(State(pool):State<PgPool>) -> Result<Json<Vec<TraditionalDisplay>>,StatusCode>{
-    get_all_traditional_handler(&pool).await.map(Json).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
+pub async fn get_all_traditional(State(state): State<Arc<AppState>>) -> Result<Json<Vec<TraditionalDisplay>>,StatusCode>{
+    get_all_traditional_handler(&state.db).await.map(Json).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
 }

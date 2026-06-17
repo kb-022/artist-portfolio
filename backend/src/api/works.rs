@@ -1,8 +1,10 @@
+use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use serde::Serialize;
 use sqlx::{FromRow, PgPool};
 use axum::Json;
+use crate::AppState;
 
 #[derive(Debug, Serialize, FromRow)]
 pub struct Work {
@@ -28,6 +30,6 @@ async fn get_work_by_slug_handler(pool: &PgPool,slug: String) -> Result<Work,sql
     .await
 }
 
-pub async fn get_work_by_slug(State(pool): State<PgPool>, Path(slug): Path<String>) -> Result<Json<Work>,StatusCode>{
-    get_work_by_slug_handler(&pool, slug).await.map(Json).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
+pub async fn get_work_by_slug(State(state): State<Arc<AppState>>, Path(slug): Path<String>) -> Result<Json<Work>,StatusCode>{
+    get_work_by_slug_handler(&state.db, slug).await.map(Json).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
 }
