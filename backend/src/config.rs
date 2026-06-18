@@ -2,7 +2,7 @@
 pub struct Config{
     pub database_url: String,
     pub jwt_secret: String,
-    pub jwt_expires_in: String,
+    pub jwt_expires_in: i32,
     pub jwt_max_age: i32,
     pub admin_username: String,
     pub admin_password: String,
@@ -19,7 +19,7 @@ impl Config {
         Config{
             database_url,
             jwt_secret,
-            jwt_expires_in,
+            jwt_expires_in: jwt_expires_in.parse::<i32>().unwrap(),
             jwt_max_age: jwt_max_age.parse::<i32>().unwrap(),
             admin_username,
             admin_password,

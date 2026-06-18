@@ -11,9 +11,7 @@ use dotenv;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
 use std::sync::Arc;
-use jsonwebtoken::crypto;
-use jsonwebtoken::crypto::CryptoProvider;
-use tower_http::cors::{CorsLayer, Any};
+use tower_http::cors::{CorsLayer};
 
 pub struct AppState {
     db: Pool<Postgres>,
@@ -35,10 +33,9 @@ async fn main() {
     sqlx::migrate!().run(&pool).await.expect("Migrations failed");
 
     let cors = CorsLayer::new()
-        //.allow_origin("http://localhost:3000".parse::<HeaderValue>().unwrap())
-        .allow_origin(Any)
+        .allow_origin("http://localhost:3000".parse::<HeaderValue>().unwrap())
         .allow_methods(vec![Method::GET, Method::POST, Method::PATCH, Method::DELETE])
-        //.allow_credentials(true)
+        .allow_credentials(true)
         .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
 
     let app = create_router(Arc::new(AppState{

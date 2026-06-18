@@ -30,7 +30,7 @@ pub async fn login_user_handler(
 
     let now = chrono::Utc::now();
     let iat = now.timestamp() as usize;
-    let exp = (now + chrono::Duration::minutes(60)).timestamp() as usize;
+    let exp = (now + chrono::Duration::minutes(data.env.jwt_expires_in as i64)).timestamp() as usize;
     let claims: TokenClaims = TokenClaims{
         sub: data.env.admin_username.clone(),
         exp,
@@ -45,7 +45,7 @@ pub async fn login_user_handler(
 
     let cookie = Cookie::build(("token", token.to_owned()))
         .path("/")
-        .max_age(time::Duration::hours(1))
+        .max_age(time::Duration::minutes(data.env.jwt_max_age as i64))
     .same_site(SameSite::Lax)
         .secure(false) //change to true in prod
         .http_only(true);
