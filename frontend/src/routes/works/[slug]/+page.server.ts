@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		const artwork: Art = await res.json();
 
 		// Prepend backend URL to image path
-		artwork.image = `${PUBLIC_API_URL}${artwork.image}`;
+		artwork.image = `${artwork.image}`;
 
 		return { artwork };
 	} catch (err) {

@@ -2,20 +2,22 @@ mod api;
 mod auth;
 mod config;
 mod route;
+mod storage;
 
 use crate::config::Config;
 use crate::route::create_router;
 use axum::http::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
 use axum::http::{HeaderValue, Method};
-use dotenv;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
 use std::sync::Arc;
 use tower_http::cors::{CorsLayer};
+use crate::storage::Storage;
 
 pub struct AppState {
     db: Pool<Postgres>,
     env: Config,
+    storage: Storage,
 }
 
 #[tokio::main]
@@ -30,6 +32,9 @@ async fn main() {
         .await
         .expect("Database connection failed");
 
+    let storage = Storage::init(&config).await;
+
+
     sqlx::migrate!().run(&pool).await.expect("Migrations failed");
 
     let cors = CorsLayer::new()
@@ -41,6 +46,7 @@ async fn main() {
     let app = create_router(Arc::new(AppState{
         db: pool.clone(),
         env: config.clone(),
+        storage,
     }))
         .layer(cors);
 

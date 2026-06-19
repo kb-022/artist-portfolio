@@ -31,8 +31,8 @@ pub async fn get_all_mediums(State(state): State<Arc<AppState>>) ->  Result<Json
     get_all_mediums_handler(&state.db).await.map(Json).map_err(|e| database_error(e))
 }
 
-pub async fn create_medium(State(state): State<Arc<AppState>>, Json(medium): Json<QueryMedium>) -> Result<(StatusCode, Json<Medium>),(StatusCode, Json<serde_json::Value>)> {
-    let existing_medium = sqlx::query_as!(Medium, "SELECT * FROM mediums WHERE name = $1", medium.name)
+pub async fn create_medium(State(state): State<Arc<AppState>>, Json(body): Json<QueryMedium>) -> Result<(StatusCode, Json<Medium>),(StatusCode, Json<serde_json::Value>)> {
+    let existing_medium = sqlx::query_as!(Medium, "SELECT * FROM mediums WHERE name = $1", body.name)
         .fetch_optional(&state.db)
         .await
         .map_err(|e| database_error(e))?;
@@ -41,18 +41,18 @@ pub async fn create_medium(State(state): State<Arc<AppState>>, Json(medium): Jso
         return Err(conflict_error("Medium already exists"));
     }
 
-    let slug = generate_unique_slug(&medium.name, &state.db, "mediums")
+    let slug = generate_unique_slug(&body.name, &state.db, "mediums")
         .await
         .map_err(|e| database_error(e))?;
 
-    sqlx::query_as!(Medium, "INSERT INTO mediums (name, slug) VALUES ($1, $2) RETURNING *", medium.name, slug)
+    sqlx::query_as!(Medium, "INSERT INTO mediums (name, slug) VALUES ($1, $2) RETURNING *", body.name, slug)
         .fetch_one(&state.db)
         .await
         .map(|med| (StatusCode::CREATED, Json(med)))
         .map_err(|_| internal_server_error("Failed to create medium"))
 }
 
-pub async fn update_medium(State(state): State<Arc<AppState>>, Path(slug): Path<String>, Json(medium): Json<QueryMedium>) -> Result<(StatusCode, Json<Medium>), (StatusCode, Json<serde_json::Value>)>{
+pub async fn update_medium(State(state): State<Arc<AppState>>, Path(slug): Path<String>, Json(body): Json<QueryMedium>) -> Result<(StatusCode, Json<Medium>), (StatusCode, Json<serde_json::Value>)>{
     let existing_medium = sqlx::query_as!(Medium, "SELECT * FROM mediums WHERE slug = $1", slug)
         .fetch_optional(&state.db)
         .await
@@ -60,7 +60,7 @@ pub async fn update_medium(State(state): State<Arc<AppState>>, Path(slug): Path<
 
 
     if existing_medium.is_some(){
-        let existing_name = sqlx::query_as!(Medium, "SELECT * FROM mediums WHERE name = $1", medium.name)
+        let existing_name = sqlx::query_as!(Medium, "SELECT * FROM mediums WHERE name = $1", body.name)
             .fetch_optional(&state.db)
             .await
             .map_err(|e| database_error(e))?;
@@ -69,12 +69,12 @@ pub async fn update_medium(State(state): State<Arc<AppState>>, Path(slug): Path<
             return Err(conflict_error("name already exists"));
         }
 
-        let new_slug = generate_unique_slug(&medium.name, &state.db, "mediums")
+        let new_slug = generate_unique_slug(&body.name, &state.db, "mediums")
             .await
             .map_err(|e| database_error(e))?;
 
 
-        sqlx::query_as!(Medium, "UPDATE mediums SET name=$1, slug=$2 WHERE slug=$3 RETURNING *", medium.name, new_slug, slug)
+        sqlx::query_as!(Medium, "UPDATE mediums SET name=$1, slug=$2 WHERE slug=$3 RETURNING *", body.name, new_slug, slug)
             .fetch_one(&state.db)
             .await
             .map(|med| (StatusCode::OK, Json(med)))
