@@ -4,6 +4,7 @@ use axum::http::StatusCode;
 use axum::Json;
 use serde::Serialize;
 use sqlx::{FromRow, PgPool};
+use crate::api::error::database_error;
 use crate::AppState;
 
 #[derive(Debug, FromRow, Serialize)]
@@ -22,6 +23,6 @@ async fn get_all_traditional_handler(pool: &PgPool) -> Result<Vec<TraditionalDis
         .await
 }
 
-pub async fn get_all_traditional(State(state): State<Arc<AppState>>) -> Result<Json<Vec<TraditionalDisplay>>,StatusCode>{
-    get_all_traditional_handler(&state.db).await.map(Json).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
+pub async fn get_all_traditional(State(state): State<Arc<AppState>>) -> Result<Json<Vec<TraditionalDisplay>>,(StatusCode, Json<serde_json::Value>)>{
+    get_all_traditional_handler(&state.db).await.map(Json).map_err(|e| database_error(e))
 }

@@ -4,6 +4,7 @@ use axum::http::StatusCode;
 use serde::Serialize;
 use sqlx::{FromRow, PgPool};
 use axum::Json;
+use crate::api::error::database_error;
 use crate::AppState;
 
 #[derive(Debug, Serialize, FromRow)]
@@ -30,6 +31,6 @@ async fn get_work_by_slug_handler(pool: &PgPool,slug: String) -> Result<Work,sql
     .await
 }
 
-pub async fn get_work_by_slug(State(state): State<Arc<AppState>>, Path(slug): Path<String>) -> Result<Json<Work>,StatusCode>{
-    get_work_by_slug_handler(&state.db, slug).await.map(Json).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
+pub async fn get_work_by_slug(State(state): State<Arc<AppState>>, Path(slug): Path<String>) -> Result<Json<Work>,(StatusCode, Json<serde_json::Value>)>{
+    get_work_by_slug_handler(&state.db, slug).await.map(Json).map_err(|e| database_error(e))
 }

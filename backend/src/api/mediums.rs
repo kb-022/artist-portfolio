@@ -10,7 +10,7 @@ use crate::AppState;
 
 #[derive(Debug,Serialize,FromRow)]
 pub struct Medium{
-    pub id: i16,
+    pub id: i32,
     pub name: String,
     pub slug: String,
 }
@@ -27,8 +27,8 @@ async fn get_all_mediums_handler(pool: &PgPool) -> Result<Vec<Medium>,sqlx::Erro
     .await
 }
 
-pub async fn get_all_mediums(State(state): State<Arc<AppState>>) ->  Result<Json<Vec<Medium>>, StatusCode>{
-    get_all_mediums_handler(&state.db).await.map(Json).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
+pub async fn get_all_mediums(State(state): State<Arc<AppState>>) ->  Result<Json<Vec<Medium>>, (StatusCode, Json<serde_json::Value>)>{
+    get_all_mediums_handler(&state.db).await.map(Json).map_err(|e| database_error(e))
 }
 
 pub async fn create_medium(State(state): State<Arc<AppState>>, Json(medium): Json<QueryMedium>) -> Result<(StatusCode, Json<Medium>),(StatusCode, Json<serde_json::Value>)> {

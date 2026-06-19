@@ -1,17 +1,17 @@
--- 1. Mediums Table (Traditional works only)
+-- 1. Mediums
 CREATE TABLE mediums (
-                         id SMALLINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                         name TEXT NOT NULL UNIQUE,
-                         slug TEXT NOT NULL UNIQUE
-);
+                         id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                         name TEXT NOT NULL UNIQUE CHECK (char_length(name) <= 100),
+                         slug TEXT NOT NULL UNIQUE CHECK (slug ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$')
+    );
 
--- 2. Collections Table (Digital works only)
+-- 2. Collections
 CREATE TABLE collections (
-                             id SMALLINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                             name TEXT NOT NULL UNIQUE,
-                             slug TEXT NOT NULL UNIQUE,
-                             description TEXT,
-                             cover_image TEXT -- Relative path to image
+                             id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                             name TEXT NOT NULL UNIQUE CHECK (char_length(name) <= 100),
+                             slug TEXT NOT NULL UNIQUE CHECK (slug ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'),
+                             description TEXT CHECK (char_length(description) <= 2000),
+    cover_work_id INT
 );
 
 -- 3. Works Table
@@ -20,12 +20,13 @@ CREATE TABLE works (
                        title TEXT NOT NULL,
                        slug TEXT NOT NULL UNIQUE,
                        description TEXT,
-                       year SMALLINT NOT NULL CHECK (year > 1800),
+                       year SMALLINT NOT NULL CHECK (year > 2000),
+                       image TEXT NOT NULL,
     art_type TEXT NOT NULL CHECK (art_type IN ('digital', 'traditional')),
 
     -- Foreign Keys
-    collection_id SMALLINT REFERENCES collections(id) ON DELETE RESTRICT,
-    medium_id SMALLINT REFERENCES mediums(id) ON DELETE RESTRICT,
+    collection_id INT REFERENCES collections(id) ON DELETE RESTRICT,
+    medium_id INT REFERENCES mediums(id) ON DELETE RESTRICT,
 
     -- Timestamps
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -44,12 +45,21 @@ CREATE TABLE works (
     )
 );
 
--- Indexing for performance
+-- Cover FK after works exists
+ALTER TABLE collections
+    ADD CONSTRAINT fk_cover_work
+        FOREIGN KEY (cover_work_id)
+            REFERENCES works(id)
+            ON DELETE SET NULL
+            DEFERRABLE INITIALLY DEFERRED;
+
+-- Indexes
 CREATE INDEX idx_works_art_type ON works(art_type);
 CREATE INDEX idx_works_collection_id ON works(collection_id) WHERE collection_id IS NOT NULL;
 CREATE INDEX idx_works_medium_id ON works(medium_id) WHERE medium_id IS NOT NULL;
+CREATE INDEX idx_collections_cover_work_id ON collections(cover_work_id) WHERE cover_work_id IS NOT NULL;
 
--- Automated updated_at trigger
+-- updated_at trigger
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
