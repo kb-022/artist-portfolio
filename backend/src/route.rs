@@ -1,6 +1,8 @@
 use std::sync::Arc;
 use axum::{middleware, Router};
+use axum::extract::DefaultBodyLimit;
 use axum::routing::{get, patch, post};
+use tower_http::limit::RequestBodyLimitLayer;
 use crate::api::collections::{create_collection, delete_collection, get_all_collections, get_collection_by_slug, update_collection, update_collection_cover};
 use crate::api::mediums::{create_medium, delete_medium, get_all_mediums, update_medium};
 use crate::api::traditional::get_all_traditional;
@@ -31,5 +33,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/api/admin/collections/{slug}/cover", patch(update_collection_cover).route_layer(middleware::from_fn_with_state(app_state.clone(), auth)))
         .route("/api/admin/works", post(create_work).route_layer(middleware::from_fn_with_state(app_state.clone(), auth)))
         .route("/api/admin/works/{slug}", patch(update_work).delete(delete_work).route_layer(middleware::from_fn_with_state(app_state.clone(), auth)))
+        .layer(DefaultBodyLimit::disable())
+        .layer(RequestBodyLimitLayer::new(20 * 1024 * 1024))
         .with_state(app_state)
 }
