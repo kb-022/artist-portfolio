@@ -17,3 +17,7 @@ pub fn internal_server_error (msg: &str) -> (StatusCode, Json<serde_json::Value>
 pub fn not_found_error (msg: &str) -> (StatusCode, Json<serde_json::Value>){
     (StatusCode::NOT_FOUND, Json(serde_json::json!({"status":"error","message": msg})))
 }
+
+pub fn bad_request_error (msg: &str) -> (StatusCode, Json<serde_json::Value>){
+    (StatusCode::BAD_REQUEST, Json(serde_json::json!({"status":"error","message": msg})))
+}

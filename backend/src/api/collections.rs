@@ -4,7 +4,7 @@ use axum::http::StatusCode;
 use axum::Json;
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, PgPool};
-use crate::api::error::{conflict_error, database_error, internal_server_error, not_found_error};
+use crate::api::error::{bad_request_error, conflict_error, database_error, internal_server_error, not_found_error};
 use crate::api::utils::generate_unique_slug;
 use crate::AppState;
 
@@ -27,7 +27,7 @@ pub struct CollectionDisplay{
 
 #[derive(Deserialize)]
 pub struct QueryCollection{
-    pub name: String,
+    pub name: Option<String>,
     pub description: Option<String>,
 }
 
@@ -73,7 +73,9 @@ pub async fn get_all_works_in_collection(State(state): State<Arc<AppState>>, Pat
 pub async fn create_collection(State(state): State<Arc<AppState>>, Json(body): Json<QueryCollection>)
     -> Result<(StatusCode, Json<Collection>),(StatusCode, Json<serde_json::Value>)>{
 
-    let existing_collection = sqlx::query_as!(Collection, "SELECT * FROM collections WHERE name = $1", body.name)
+    let name = body.name.ok_or_else(|| bad_request_error("name is required"))?;
+
+    let existing_collection = sqlx::query_as!(Collection, "SELECT * FROM collections WHERE name = $1", name)
         .fetch_optional(&state.db)
         .await
         .map_err(|e| database_error(e))?;
@@ -81,11 +83,11 @@ pub async fn create_collection(State(state): State<Arc<AppState>>, Json(body): J
     if existing_collection.is_some(){
          return Err(conflict_error("Collection already exists"))
     }
-        let slug = generate_unique_slug(&body.name, &state.db, "collections")
+        let slug = generate_unique_slug(&name, &state.db, "collections")
             .await
             .map_err(|e| database_error(e))?;
 
-        sqlx::query_as!(Collection, "INSERT INTO collections (name, slug, description) VALUES ($1, $2, $3) RETURNING *", body.name, slug, body.description)
+        sqlx::query_as!(Collection, "INSERT INTO collections (name, slug, description) VALUES ($1, $2, $3) RETURNING *", name, slug, body.description)
             .fetch_one(&state.db)
             .await
             .map(|c| (StatusCode::CREATED, Json(c)))
@@ -101,22 +103,23 @@ pub async fn update_collection(State(state): State<Arc<AppState>>, Path(slug): P
 
 
     if let Some(existing) = existing_collection{
-        let existing_name = sqlx::query_as!(Collection, "SELECT * FROM collections WHERE name = $1", body.name)
-            .fetch_optional(&state.db)
-            .await
-            .map_err(|e| database_error(e))?;
-
-        if existing_name.is_some(){
-            return Err(conflict_error("name already exists"));
-        }
-
-        let new_slug = generate_unique_slug(&body.name, &state.db, "collections")
-            .await
-            .map_err(|e| database_error(e))?;
+        let new_name = body.name.as_deref();
 
         let new_description = body.description.or(existing.description);
 
-        sqlx::query_as!(Collection, "UPDATE collections SET name=$1, slug=$2, description=$3 WHERE slug=$4 RETURNING *", body.name, new_slug, new_description,slug)
+        let new_slug = match new_name {
+            Some(name) if name != existing.name => {
+                generate_unique_slug(name, &state.db, "collections")
+                    .await
+                    .map_err(|e| database_error(e))?
+            }
+            _ => existing.slug.clone(),
+        };
+
+        let final_name = new_name.unwrap_or(&existing.name);
+
+
+        sqlx::query_as!(Collection, "UPDATE collections SET name=$1, slug=$2, description=$3 WHERE slug=$4 RETURNING *", final_name, new_slug, new_description,slug)
             .fetch_one(&state.db)
             .await
             .map(|c| (StatusCode::OK, Json(c)))

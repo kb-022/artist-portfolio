@@ -44,11 +44,12 @@ impl Storage{
         }
     }
 
-    pub async fn put_object(&self, key: &str, bytes: Vec<u8>) -> Result<PutObjectOutput, SdkError<PutObjectError, HttpResponse>> {
+    pub async fn put_object(&self, key: &str, bytes: Vec<u8>, content_type: &str) -> Result<PutObjectOutput, SdkError<PutObjectError, HttpResponse>> {
         let body = aws_sdk_s3::primitives::ByteStream::from(bytes);
         self.client
         .put_object()
         .bucket(&self.bucket_name)
+            .content_type(content_type)
         .key(key)
         .body(body)
         .send()

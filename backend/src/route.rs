@@ -4,7 +4,7 @@ use axum::routing::{get, patch, post};
 use crate::api::collections::{create_collection, delete_collection, get_all_collections, get_all_works_in_collection, get_collection_by_slug, update_collection, update_collection_cover};
 use crate::api::mediums::{create_medium, delete_medium, get_all_mediums, update_medium};
 use crate::api::traditional::get_all_traditional;
-use crate::api::works::{get_work_by_slug, update_work};
+use crate::api::works::{create_work, get_work_by_slug, update_work};
 use crate::{root, AppState};
 use crate::auth::handler::{get_me_handler, login_user_handler, logout_handler};
 use crate::auth::jwt_auth::auth;
@@ -29,6 +29,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/api/admin/collections", post(create_collection).route_layer(middleware::from_fn_with_state(app_state.clone(), auth)))
         .route("/api/admin/collections/{slug}", patch(update_collection).delete(delete_collection).route_layer(middleware::from_fn_with_state(app_state.clone(), auth)))
         .route("/api/admin/collections/{slug}/cover", patch(update_collection_cover).route_layer(middleware::from_fn_with_state(app_state.clone(), auth)))
+        .route("/api/admin/works", post(create_work).route_layer(middleware::from_fn_with_state(app_state.clone(), auth)))
         .route("/api/admin/works/{slug}", patch(update_work).route_layer(middleware::from_fn_with_state(app_state.clone(), auth)))
         .with_state(app_state)
 }
