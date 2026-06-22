@@ -68,6 +68,28 @@ pub async fn get_work_by_slug(State(state): State<Arc<AppState>>, Path(slug): Pa
 
 }
 
+async fn get_all_works_in_collection_handler(pool: &PgPool, slug: String) -> Result<Vec<GetWork>,sqlx::Error> {
+    sqlx::query_as::<_,GetWork>("SELECT works.id,works.title,works.slug,works.description,works.image, works.year, works.art_type, collections.name AS collection_medium_name  FROM works
+LEFT JOIN collections ON collections.id = works.collection_id
+WHERE collections.slug = $1")
+        .bind(slug)
+        .fetch_all(pool)
+        .await
+}
+
+pub async fn get_all_works_in_collection(State(state): State<Arc<AppState>>, Path(slug): Path<String>)
+                                         -> Result<Json<Vec<GetWork>>,(StatusCode, Json<serde_json::Value>)> {
+    let mut works = get_all_works_in_collection_handler(&state.db, slug).await.map_err(|e| database_error(e))?;
+
+    for work in works.iter_mut(){
+        if let image = work.image.clone(){
+            work.image = state.storage.public_url(&image);
+        }
+    }
+
+    Ok(Json(works))
+}
+
 pub async fn create_work(State(state): State<Arc<AppState>>, mut multipart: Multipart) -> Result<( StatusCode, Json<Work>),(StatusCode, Json<serde_json::Value>)>{
     let mut title :Option<String> = None;
     let mut description :Option<String> = None;

@@ -24,5 +24,13 @@ async fn get_all_traditional_handler(pool: &PgPool) -> Result<Vec<TraditionalDis
 }
 
 pub async fn get_all_traditional(State(state): State<Arc<AppState>>) -> Result<Json<Vec<TraditionalDisplay>>,(StatusCode, Json<serde_json::Value>)>{
-    get_all_traditional_handler(&state.db).await.map(Json).map_err(|e| database_error(e))
+    let mut traditonal_works = get_all_traditional_handler(&state.db).await.map_err(|e| database_error(e))?;
+
+    for work in traditonal_works.iter_mut(){
+        if let image = work.image.clone(){
+            work.image = state.storage.public_url(&image);
+        }
+    }
+
+    Ok(Json(traditonal_works))
 }
