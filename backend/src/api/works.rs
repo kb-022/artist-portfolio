@@ -191,3 +191,22 @@ pub async fn update_work(State(state): State<Arc<AppState>>, Path(slug): Path<St
 
 }
 
+pub async fn delete_work(State(state): State<Arc<AppState>>, Path(slug): Path<String>) -> Result<(StatusCode, Json<Work>), (StatusCode, Json<serde_json::Value>)> {
+    let existing_work = sqlx::query_as!(Work, "SELECT * FROM works WHERE slug = $1", slug)
+        .fetch_optional(&state.db)
+        .await
+        .map_err(|e| database_error(e))?;
+
+    if let Some(work) = existing_work {
+        sqlx::query_as!(Work, "DELETE FROM works WHERE id = $1 RETURNING *", work.id)
+            .fetch_one(&state.db)
+            .await
+            .map_err(|_| internal_server_error("Failed to delete medium"))?;
+
+        state.storage.remove_object(&work.image).await.map_err(|_| internal_server_error("Failed to delete image"))?;
+
+        Ok((StatusCode::OK, Json(work)))
+    } else {
+        Err(not_found_error("work does not exist"))
+    }
+}
