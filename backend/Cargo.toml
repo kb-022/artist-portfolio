@@ -21,3 +21,4 @@ aws-sdk-s3 = { version = "1.137.0", features = ["rt-tokio"] }
 aws-config = { version = "1.8.18", features = ["behavior-version-latest"] }
 uuid = { version = "1.23.3", features = ["v4"] }
 bytes = "1.11.1"
+tower_governor = "0.8.0"

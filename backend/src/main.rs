@@ -4,6 +4,7 @@ mod config;
 mod route;
 mod storage;
 
+use std::net::SocketAddr;
 use crate::config::Config;
 use crate::route::create_router;
 use axum::http::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
@@ -11,6 +12,10 @@ use axum::http::{HeaderValue, Method};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
 use std::sync::Arc;
+use std::time::Duration;
+use tower_governor::governor::GovernorConfigBuilder;
+use tower_governor::GovernorLayer;
+use tower_governor::key_extractor::SmartIpKeyExtractor;
 use tower_http::cors::{CorsLayer};
 use crate::storage::Storage;
 
@@ -26,6 +31,15 @@ async fn main() {
 
     let config = Config::init();
 
+    let general_governor_conf = Arc::new(
+      GovernorConfigBuilder::default()
+          .per_second(1)
+          .burst_size(80)
+          .key_extractor(SmartIpKeyExtractor)
+          .finish()
+        .unwrap(),
+    );
+
     let pool = PgPoolOptions::new()
         .max_connections(10)
         .connect(&config.database_url)
@@ -38,17 +52,20 @@ async fn main() {
     sqlx::migrate!().run(&pool).await.expect("Migrations failed");
 
     let cors = CorsLayer::new()
-        .allow_origin("http://localhost:3000".parse::<HeaderValue>().unwrap())
+        .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
         .allow_methods(vec![Method::GET, Method::POST, Method::PATCH, Method::DELETE])
         .allow_credentials(true)
-        .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
+        .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE])
+        .max_age(Duration::from_secs(7200));
 
     let app = create_router(Arc::new(AppState{
         db: pool.clone(),
         env: config.clone(),
         storage,
     }))
+        .layer(GovernorLayer::new(general_governor_conf))
         .layer(cors);
+
 
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
@@ -57,7 +74,7 @@ async fn main() {
 
     println!("Listening on: {}", listener.local_addr().unwrap());
 
-    axum::serve(listener,app.into_make_service())
+    axum::serve(listener,app.into_make_service_with_connect_info::<SocketAddr>())
         .await
         .expect("Failed to run server");
 }

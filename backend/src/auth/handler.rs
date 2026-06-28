@@ -9,6 +9,7 @@ use axum_extra::extract::cookie::{Cookie, SameSite};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use serde_json::json;
 use std::sync::Arc;
+use crate::api::error::internal_server_error;
 
 pub async fn login_user_handler(
     State(data): State<Arc<AppState>>,
@@ -41,7 +42,7 @@ pub async fn login_user_handler(
         &Header::default(),
         &claims,
         &EncodingKey::from_secret(data.env.jwt_secret.as_ref()),
-    ).unwrap();
+    ).map_err(|_| internal_server_error("could not create token"))?;
 
     let cookie = Cookie::build(("token", token.to_owned()))
         .path("/")
@@ -62,6 +63,7 @@ pub async fn logout_handler() -> Result<impl IntoResponse, (StatusCode, Json<ser
         .path("/")
         .max_age(time::Duration::hours(-1))
         .same_site(SameSite::Lax)
+        .secure(false) // change to true
         .http_only(true);
 
 
