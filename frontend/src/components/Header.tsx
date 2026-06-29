@@ -1,7 +1,7 @@
 // components/Header.tsx
 import { Link } from 'react-router-dom';
 import {RouterPath} from "../enums/RouterPath.ts";
-import logo from "../../public/logo.avif";
+import logo from "../assets/logo.avif";
 
 
 

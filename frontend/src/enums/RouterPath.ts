@@ -4,7 +4,10 @@ export enum RouterPath{
     HOME = "/",
     ABOUT = "/about",
     CONTACT = "/contact",
-    NOTFOUND = "*",
+    STAR = "/*",
     DIGITAL = "/digital",
     TRADITIONAL = "/traditional",
+    WORKS = "/works",
+    COLLECTIONS = "/collections",
+    NOTFOUND = "/not-found",
 }
