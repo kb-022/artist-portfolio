@@ -25,3 +25,9 @@ export interface Collection {
     cover_work_id: number;
     cover_image: string;
 }
+
+export interface Medium {
+    id : number;
+    name : string;
+    slug : string;
+}

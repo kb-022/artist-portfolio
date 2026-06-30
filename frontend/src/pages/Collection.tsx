@@ -26,9 +26,9 @@ export default function Collection() {
                  <Navigate to={RouterPath.NOTFOUND}/>
                 )}
             {collection && (
-                <div>
-                <h1>{collection.name}</h1>
-                    <p>{collection.description}</p>
+                <div className="bg-neutral-100  text-neutral-900 text-center py-16 px-4 mb-10">
+                    <h1 className="text-4xl font-bold tracking-tight mb-3">{collection.name}</h1>
+                    <p className="text-lg text-neutral-900 max-w-2xl mx-auto">{collection.description}</p>
                 </div>
             )}
 

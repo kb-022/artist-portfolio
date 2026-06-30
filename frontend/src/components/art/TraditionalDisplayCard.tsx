@@ -1,5 +1,6 @@
 import type {TraditionalWork} from "../../types.ts";
 import {RouterPath} from "../../enums/RouterPath.ts";
+import ProtectedImage from "../ProtectedImage.tsx";
 
 
 interface TraditionalWorkCardProps{
@@ -14,7 +15,8 @@ export default function TraditionalDisplayCard({work}: TraditionalWorkCardProps)
                 <p className="text-body mb-6">
                     {work.medium}
                 </p>
-            <img className="w-full" src={work.image} alt={work.title}/>
+            <ProtectedImage className="w-full" src={work.image} alt={work.title}/>
+
         </div>
         </a>
     )

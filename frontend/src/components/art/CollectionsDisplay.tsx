@@ -1,5 +1,6 @@
 import type {Collection} from "../../types.ts";
 import {RouterPath} from "../../enums/RouterPath.ts";
+import ProtectedImage from "../ProtectedImage.tsx";
 
 
 interface CollectionDisplayProps{
@@ -15,7 +16,7 @@ export default function TraditionalDisplayCard({collection}: CollectionDisplayPr
                     {collection.description}
                 </p>
                 { collection.cover_image && (
-                <img className="w-full" src={collection.cover_image} alt={collection.name}/>
+                    <ProtectedImage src={collection.cover_image} alt={collection.name} className={"w-full"}/>
                 )}
             </div>
         </a>
