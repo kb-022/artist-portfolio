@@ -14,18 +14,14 @@ export default function Admin(){
     };
     return (
         <main>
-            <div>admin</div>
-            <button onClick={handleLogout}>Log out</button>
 
             <div className="p-6">
-                <h2 className="text-2xl font-semibold text-neutral-900 mb-6">Mediums</h2>
-
                 <div className="grid grid-cols-3 gap-6">
                     <AdminMediumDisplay/>
                     <AdminWorkDisplay/>
                     <AdminCollectionDisplay/>
-
                 </div>
+                <button className="bg-red-500" onClick={handleLogout}>Log out</button>
             </div>
         </main>
     )

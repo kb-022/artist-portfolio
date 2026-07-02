@@ -80,6 +80,7 @@ export default function AdminCollectionDisplay() {
 
     return (
         <div>
+            <h2 className="text-2xl font-semibold text-neutral-900 mb-6">Collections</h2>
                 {/* Create */}
                 <div className={cardClass}>
                     <h3 className={labelClass}>Create</h3>

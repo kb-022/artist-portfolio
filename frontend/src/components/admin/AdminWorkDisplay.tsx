@@ -79,6 +79,7 @@ export default function AdminWorkDisplay(){
     const labelClass = "text-sm font-medium text-neutral-500 uppercase tracking-wide mb-4";
     return(
         <div>
+            <h2 className="text-2xl font-semibold text-neutral-900 mb-6">Works</h2>
             {/* Create */}
             <div className={cardClass}>
                 <h3 className={labelClass}>Create</h3>

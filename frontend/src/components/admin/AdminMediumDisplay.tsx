@@ -45,6 +45,7 @@ export default function AdminMediumDisplay(){
 
     return(
         <div>
+            <h2 className="text-2xl font-semibold text-neutral-900 mb-6">Mediums</h2>
         {/* Create */}
     <div className={cardClass}>
         <h3 className={labelClass}>Create</h3>
