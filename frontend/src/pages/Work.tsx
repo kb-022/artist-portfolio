@@ -1,4 +1,4 @@
-import FetchWork from "../components/hooks/FetchWork.tsx"
+import FetchWork from "../components/hooks/fetch/FetchWork.tsx"
 import {Navigate, useParams} from "react-router-dom";
 import WorkDisplay from "../components/art/WorkDisplay.tsx";
 import {RouterPath} from "../enums/RouterPath.ts";

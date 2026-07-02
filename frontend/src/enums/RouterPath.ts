@@ -10,4 +10,6 @@ export enum RouterPath{
     WORKS = "/works",
     COLLECTIONS = "/collections",
     NOTFOUND = "/not-found",
+    LOGIN = "/login",
+    ADMIN = "/admin",
 }

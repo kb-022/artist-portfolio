@@ -1,8 +1,8 @@
 import {useQuery} from "@tanstack/react-query";
-import config from "../../config.ts";
-import type {Work} from "../../types.ts";
+import config from "../../../config.ts";
+import type {Work} from "../../../types.ts";
 
-export default function FetchTraditional(slug: string) {
+export default function FetchCollectionWorks(slug: string) {
     return useQuery({
         queryKey: ['CollectionWorks',slug],
         queryFn: async () => {

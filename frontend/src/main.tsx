@@ -13,8 +13,12 @@ import {QueryClient,QueryClientProvider} from "@tanstack/react-query";
 import Work from "./pages/Work.tsx";
 import Digital from "./pages/Digital.tsx";
 import Collection from "./pages/Collection.tsx";
+import Login from "./pages/Login.tsx";
+import Admin from "./pages/Admin.tsx";
+import ProtectedLayout from "./components/ProtectedLayout.tsx";
 
 const queryClient = new QueryClient();
+
 
 const router = createBrowserRouter([
     {path: RouterPath.HOME, element: <App/>,
@@ -27,6 +31,13 @@ const router = createBrowserRouter([
             {path:RouterPath.DIGITAL, element:<Digital/>},
             {path:`${RouterPath.WORKS}/:slug`, element:<Work/>},
             {path: `${RouterPath.COLLECTIONS}/:slug`, element:<Collection/>},
+            {
+                element: <ProtectedLayout/>,
+                children: [
+                    {path: `${RouterPath.LOGIN}`, element:<Login/>},
+                    {path: `${RouterPath.ADMIN}`, element:<Admin/>},
+                ]
+            }
         ],
     },
 ]);

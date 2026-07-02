@@ -1,6 +1,6 @@
 import {useQuery} from "@tanstack/react-query";
-import config from "../../config.ts";
-import type {Collection} from "../../types.ts";
+import config from "../../../config.ts";
+import type {Collection} from "../../../types.ts";
 
 export default function FetchCollection(slug : string){
     return useQuery({

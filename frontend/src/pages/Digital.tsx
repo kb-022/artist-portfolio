@@ -1,4 +1,4 @@
-import FetchCollections from "../components/hooks/FetchCollections.tsx";
+import FetchCollections from "../components/hooks/fetch/FetchCollections.tsx";
 import CollectionsDisplay from "../components/art/CollectionsDisplay.tsx";
 
 export default function Digital() {

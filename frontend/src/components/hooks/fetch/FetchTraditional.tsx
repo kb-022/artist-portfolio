@@ -1,6 +1,6 @@
 import {useQuery} from "@tanstack/react-query";
-import config from "../../config.ts";
-import type {TraditionalWork} from "../../types.ts";
+import config from "../../../config.ts";
+import type {TraditionalWork} from "../../../types.ts";
 
 export default function FetchTraditional() {
     return useQuery({

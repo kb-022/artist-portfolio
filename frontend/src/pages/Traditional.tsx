@@ -1,6 +1,6 @@
-import FetchTraditional from "../components/hooks/FetchTraditional.tsx";
+import FetchTraditional from "../components/hooks/fetch/FetchTraditional.tsx";
 import TraditionalDisplayCard from "../components/art/TraditionalDisplayCard.tsx";
-import FetchMediums from "../components/hooks/FetchMediums.tsx";
+import FetchMediums from "../components/hooks/fetch/FetchMediums.tsx";
 import {useState} from "react";
 
 export default function Traditional() {

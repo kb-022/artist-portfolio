@@ -1,6 +1,6 @@
 import {Navigate, useParams} from "react-router-dom";
-import FetchCollection from "../components/hooks/FetchCollection.tsx";
-import FetchCollectionWorks from "../components/hooks/FetchCollectionWorks.tsx";
+import FetchCollection from "../components/hooks/fetch/FetchCollection.tsx";
+import FetchCollectionWorks from "../components/hooks/fetch/FetchCollectionWorks.tsx";
 import CollectionDisplayCard from "../components/art/CollectionDisplayCard.tsx";
 import {RouterPath} from "../enums/RouterPath.ts";
 

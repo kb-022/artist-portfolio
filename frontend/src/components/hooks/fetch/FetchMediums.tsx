@@ -1,6 +1,6 @@
 import {useQuery} from "@tanstack/react-query";
-import config from "../../config.ts";
-import type {Medium} from "../../types.ts";
+import config from "../../../config.ts";
+import type {Medium} from "../../../types.ts";
 
 export default function FetchMediums(){
     return useQuery({
