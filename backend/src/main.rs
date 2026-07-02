@@ -51,8 +51,11 @@ async fn main() {
 
     sqlx::migrate!().run(&pool).await.expect("Migrations failed");
 
+    let allowed_origin = std::env::var("CORS_ALLOWED_ORIGIN")
+        .unwrap_or_else(|_| "http://localhost:5173".to_string());
+
     let cors = CorsLayer::new()
-        .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
+        .allow_origin(allowed_origin.parse::<HeaderValue>().unwrap())
         .allow_methods(vec![Method::GET, Method::POST, Method::PATCH, Method::DELETE])
         .allow_credentials(true)
         .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE])

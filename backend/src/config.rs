@@ -12,6 +12,7 @@ pub struct Config{
     pub s3_public_bucket_url: String,
     pub s3_endpoint_url: String,
     pub s3_region: String,
+    pub production: bool,
 }
 
 impl Config {
@@ -28,6 +29,7 @@ impl Config {
         let s3_public_bucket_url = std::env::var("S3_PUBLIC_BUCKET_URL").expect("S3_PUBLIC_BUCKET_URL must be set");
         let s3_endpoint_url = std::env::var("S3_ENDPOINT_URL").expect("S3_ENDPOINT_URL must be set");
         let s3_region = std::env::var("S3_REGION").expect("S3_REGION must be set");
+        let production = std::env::var("PRODUCTION").expect("PRODUCTION must be set");
 
         Config{
             database_url,
@@ -42,6 +44,7 @@ impl Config {
             s3_public_bucket_url,
             s3_endpoint_url,
             s3_region,
+            production: production.parse::<bool>().unwrap(),
         }
     }
 }

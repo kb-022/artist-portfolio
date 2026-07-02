@@ -40,10 +40,13 @@ export const AuthProvider = ({children} : {children : ReactNode}) => {
                 body: JSON.stringify({username, password}),
                 credentials: "include"
             });
-            if (!response.ok) throw new Error("Invalid credentials");
+            if (!response.ok){
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Invalid credentials");
+            }
             setIsAuthenticated(true);
         } catch {
-            throw new Error("Invalid username or password");
+            throw new Error(err instanceof Error ? err.message: "Invalid username or password");
         }
 
     };

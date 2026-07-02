@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {type SubmitEventHandler, useState} from "react";
 import FetchCollections from "../hooks/fetch/FetchCollections.tsx";
 import CreateCollection from "../hooks/auth/collection/CreateCollection.tsx";
 import UpdateCollection from "../hooks/auth/collection/UpdateCollection.tsx";
@@ -32,7 +32,7 @@ export default function AdminCollectionDisplay() {
     const deleteCollection = DeleteCollection();
     const updateCover = UpdateCollectionCover();
 
-    const handleCreate = async (e) => {
+    const handleCreate : SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
         await createCollection.mutateAsync({
             name: createName,
@@ -42,7 +42,7 @@ export default function AdminCollectionDisplay() {
         setCreateDescription("");
     };
 
-    const handleUpdate = async (e) => {
+    const handleUpdate : SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
         await updateCollection.mutateAsync({
             slug: updateSlug,
@@ -54,13 +54,16 @@ export default function AdminCollectionDisplay() {
         setUpdateDescription("");
     };
 
-    const handleDelete = async (e) => {
+    const handleDelete : SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
+        if (!window.confirm("Are you sure you want to delete? This action cannot be reversed!")){
+            return;
+        }
         await deleteCollection.mutateAsync(deleteSlug);
         setDeleteSlug("");
     };
 
-    const handleCover = async (e) => {
+    const handleCover : SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
         await updateCover.mutateAsync({
             slug: coverSlug,

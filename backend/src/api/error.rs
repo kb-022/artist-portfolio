@@ -3,7 +3,8 @@ use axum::Json;
 use sqlx::Error;
 
 pub fn database_error (e: Error) -> (StatusCode, Json<serde_json::Value>){
-    (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"status":"error", "message" : format!("{:?}",e)})))
+    eprintln!("Database Error: {:?}", e);
+    (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"status":"error", "message" : "Internal error occurred"})))
 }
 
 pub fn conflict_error (msg: &str) -> (StatusCode, Json<serde_json::Value>){

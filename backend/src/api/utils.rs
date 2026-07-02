@@ -1,6 +1,11 @@
 use sqlx::PgPool;
 
 pub async fn generate_unique_slug(name: &str, pool: &PgPool, table_name: &str) -> Result<String, sqlx::Error> {
+   match table_name {
+       "works" | "collections" | "mediums" => {},
+       _ => return Err(sqlx::Error::Configuration("Invalid table name".into())),
+   }
+
     let slug = slug::slugify(name);
 
     let query = format!("SELECT COUNT(*) FROM {} WHERE slug = $1", table_name);
@@ -23,7 +28,7 @@ pub async fn generate_unique_slug(name: &str, pool: &PgPool, table_name: &str) -
             .await?;
 
         if existing_slug.0 == 0 {
-            return Ok(slug);
+            return Ok(slug_to_try);
         }
 
         counter += 1;

@@ -1,5 +1,5 @@
 import DeleteWork from "../hooks/auth/works/DeleteWork.tsx";
-import {useState} from "react";
+import {type SubmitEventHandler, useState} from "react";
 import FetchAllWorks from "../hooks/fetch/FetchAllWorks.tsx";
 import UpdateWork from "../hooks/auth/works/UpdateWork.tsx";
 import CreateWork from "../hooks/auth/works/CreateWork.tsx";
@@ -30,7 +30,7 @@ export default function AdminWorkDisplay(){
     const { data: mediums } = FetchMediums();
     const { data: collections } = FetchCollections();
 
-    const handleCreate = async (e) => {
+    const handleCreate : SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
         if (!createImage) return;
         await createWork.mutateAsync({
@@ -51,7 +51,7 @@ export default function AdminWorkDisplay(){
         setCreateImage(null);
     };
 
-    const handlePatch = async (e) => {
+    const handlePatch : SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
         await patchWork.mutateAsync({
             slug: patchSlug,
@@ -64,8 +64,11 @@ export default function AdminWorkDisplay(){
         setPatchDescription("");
         setPatchYear("");
     };
-    const handleDelete = async (e) => {
+    const handleDelete : SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
+        if (!window.confirm("Are you sure you want to delete? This action cannot be reversed!")){
+            return;
+        }
         await deleteWork.mutateAsync(deleteSlug);
         setDeleteSlug("");
     }

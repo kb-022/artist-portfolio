@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {type SubmitEventHandler, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {useAuth} from "../components/AuthContext.tsx";
 import {RouterPath} from "../enums/RouterPath.ts";
@@ -10,9 +10,8 @@ export default function Login() {
     const [error, setError] = useState("");
 
     const navigate = useNavigate();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    const handleSubmit = async (e ) => {
+
+    const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (e ) => {
         e.preventDefault();
         setError("");
         try{
@@ -24,6 +23,8 @@ export default function Login() {
         }
     }
     return(
+        <div>
+        <label htmlFor="username">Username</label>
         <form onSubmit={handleSubmit}>
             <input type = "text"
                    id="username"
@@ -32,6 +33,7 @@ export default function Login() {
                    placeholder="Enter username"
                    required
             />
+            <label htmlFor="password">Password</label>
             <input type = "password"
                    id="password"
                    name="password"
@@ -42,5 +44,6 @@ export default function Login() {
             {error && <p>{error}</p>}
             <button type="submit">Log in</button>
         </form>
+        </div>
     )
 }

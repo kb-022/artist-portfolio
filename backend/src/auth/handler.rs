@@ -9,25 +9,31 @@ use axum_extra::extract::cookie::{Cookie, SameSite};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use serde_json::json;
 use std::sync::Arc;
+use subtle::ConstantTimeEq;
 use crate::api::error::internal_server_error;
+
+fn ct_str_eq(a: &str, b: &str) -> bool {
+    let hash_a = blake3::hash(a.as_bytes());
+    let hash_b = blake3::hash(b.as_bytes());
+    hash_a.as_bytes().ct_eq(hash_b.as_bytes()).into()
+}
 
 pub async fn login_user_handler(
     State(data): State<Arc<AppState>>,
     Json(body): Json<LoginRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
-    //handle env user and password
-    if body.username != data.env.admin_username {
-        return Err((StatusCode::UNAUTHORIZED, Json(json!({"error": "invalid credentials"}))));
-    }
-    
     let admin_hash_password = PasswordHash::new(&data.env.admin_password)
         .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({"error": "server misconfiguration"}))))?;
 
     let argon2 = Argon2::default();
-    if argon2.verify_password(body.password.as_bytes(), &admin_hash_password).is_err(){
+
+    let username_verify = ct_str_eq(&body.username, &data.env.admin_username);
+
+    let password_verify = argon2.verify_password(body.password.as_bytes(), &admin_hash_password).is_ok();
+
+    if !(username_verify && password_verify) {
         return Err((StatusCode::UNAUTHORIZED, Json(json!({"error": "invalid credentials"}))));
     }
-
 
     let now = chrono::Utc::now();
     let iat = now.timestamp() as usize;
@@ -48,7 +54,7 @@ pub async fn login_user_handler(
         .path("/")
         .max_age(time::Duration::minutes(data.env.jwt_max_age as i64))
     .same_site(SameSite::Lax)
-        .secure(false) //change to true in prod
+        .secure(data.env.production)
         .http_only(true);
 
     let mut response = Response::new(json!({"status": "success", "token": token}).to_string());
@@ -63,9 +69,8 @@ pub async fn logout_handler() -> Result<impl IntoResponse, (StatusCode, Json<ser
         .path("/")
         .max_age(time::Duration::hours(-1))
         .same_site(SameSite::Lax)
-        .secure(false) // change to true
+        .secure(std::env::var("PRODUCTION").ok().unwrap().parse::<bool>().unwrap())
         .http_only(true);
-
 
     let mut response = Response::new(json!({"status": "success"}).to_string());
     response

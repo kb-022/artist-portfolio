@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {type SubmitEventHandler, useState} from "react";
 import CreateMedium from "../hooks/auth/mediums/CreateMedium.tsx";
 import DeleteMedium from "../hooks/auth/mediums/DeleteMedium.tsx";
 import UpdateMedium from "../hooks/auth/mediums/UpdateMedium.tsx";
@@ -17,18 +17,21 @@ export default function AdminMediumDisplay(){
 
     const {data : mediums} = FetchMediums();
 
-    const handleCreate = async (e) => {
+    const handleCreate : SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
         await createMedium.mutateAsync(createName);
         setCreateName("");
     }
-    const handleDelete = async (e) => {
+    const handleDelete : SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
+        if (!window.confirm("Are you sure you want to delete? This action cannot be reversed!")){
+            return;
+        }
         await deleteMedium.mutateAsync(deleteSlug);
         setDeleteSlug("");
     }
 
-    const handlePatch = async (e) => {
+    const handlePatch : SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
         await patchMedium.mutateAsync({slug: patchSlug, name: patchName});
         setPatchSlug("");

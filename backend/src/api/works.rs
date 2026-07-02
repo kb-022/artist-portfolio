@@ -145,12 +145,12 @@ pub async fn create_work(State(state): State<Arc<AppState>>, mut multipart: Mult
         }
     }
 
-    let title = title.ok_or_else(|| println!("title is required")).unwrap();
-    let year = year.ok_or_else(|| println!("year is required")).unwrap();
-    let art_type = art_type.ok_or_else(|| println!("art_type is required")).unwrap();
-    let key = key.ok_or_else(|| println!("image is required")).unwrap();
-    let content_type = content_type.ok_or_else(|| println!("image is required")).unwrap();
-    let bytes = bytes.ok_or_else(|| println!("image is required")).unwrap();
+    let title = title.ok_or_else(|| bad_request_error("title is required"))?;
+    let year = year.ok_or_else(|| bad_request_error("year is required"))?;
+    let art_type = art_type.ok_or_else(|| bad_request_error("art_type is required"))?;
+    let key = key.ok_or_else(|| bad_request_error("image is required"))?;
+    let content_type = content_type.ok_or_else(|| bad_request_error("image is required"))?;
+    let bytes = bytes.ok_or_else(|| bad_request_error("image is required"))?;
 
     match art_type.as_str() {
         "digital" if collection_id.is_none() => {

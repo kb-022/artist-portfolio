@@ -49,7 +49,7 @@ export default function Traditional() {
 
             {isError && (
                 <div>
-                    <p>Could not load content. {(error as Error)?.message}</p>
+                    <p>Could not load content. {(error instanceof Error) ? error.message : "Unknown error"}</p>
                 </div>
             )}
 

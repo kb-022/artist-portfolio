@@ -22,3 +22,5 @@ aws-config = { version = "1.8.18", features = ["behavior-version-latest"] }
 uuid = { version = "1.23.3", features = ["v4"] }
 bytes = "1.11.1"
 tower_governor = "0.8.0"
+blake3 = "1.8.5"
+subtle = "2.6.1"
