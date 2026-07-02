@@ -64,12 +64,12 @@ pub async fn login_user_handler(
     Ok(response)
 }
 
-pub async fn logout_handler() -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
+pub async fn logout_handler(State(data): State<Arc<AppState>>) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
     let cookie = Cookie::build(("token", ""))
         .path("/")
         .max_age(time::Duration::hours(-1))
         .same_site(SameSite::Lax)
-        .secure(std::env::var("PRODUCTION").ok().unwrap().parse::<bool>().unwrap())
+        .secure(data.env.production)
         .http_only(true);
 
     let mut response = Response::new(json!({"status": "success"}).to_string());
