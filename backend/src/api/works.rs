@@ -45,6 +45,16 @@ pub struct UpdateWork {
     pub year: Option<i16>,
 }
 
+async fn get_all_works_handler(pool: &PgPool) -> Result<Vec<Work>, sqlx::Error> {
+    sqlx::query_as!(Work, "SELECT * FROM works")
+    .fetch_all(pool)
+    .await
+}
+
+pub async fn get_all_works(State(state): State<Arc<AppState>>) -> Result<Json<Vec<Work>>, (StatusCode, Json<serde_json::Value>)> {
+    get_all_works_handler(&state.db).await.map(Json).map_err(|e| database_error(e))
+}
+
 async fn get_work_by_slug_handler(pool: &PgPool,slug: String) -> Result<GetWork,sqlx::Error> {
      sqlx::query_as::<_,GetWork>("SELECT works.id, works.title, works.slug, works.description, works.year, works.image, works.art_type,
     COALESCE(collections.name,mediums.name) AS collection_medium_name
